@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klasopstelling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F6F4EE;
+    --surface: #FFFFFF;
+    --ink: #24261F;
+    --muted: #837D6C;
+    --line: #DED8C7;
+    --line-strong: #C7C0AC;
+    --board: #234634;
+    --board-dark: #1A362A;
+    --chalk: #F2EFE0;
+    --amber: #C97A22;
+    --amber-bg: #FBEBD6;
+    --rose: #A8455A;
+    --rose-bg: #F7E3E6;
+    --accent: #234634;
+    --accent-soft: #E4EBE5;
+    --chip-grey: #E7E4DA;
+    --chip-grey-border: #AFA894;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(36,38,31,0.06), 0 4px 14px rgba(36,38,31,0.05);
+    font-size: 15px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.45;
+    min-height:100vh;
+  }
+  h1,h2,h3, .label-font, button, .btn, .seat-chip, .tray-chip{
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+  }
+  .app{max-width:1320px; margin:0 auto; padding: 14px 20px 40px;}
+
+  /* ---------- header ---------- */
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    margin-bottom:12px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:9px;}
+  .brand-mark{
+    width:28px;height:28px;border-radius:7px;background:var(--board);
+    display:flex;align-items:center;justify-content:center;color:var(--chalk);
+    font-weight:700; font-size:12px; letter-spacing:0.5px;
+    box-shadow: inset 0 0 0 2px rgba(242,239,224,0.15);
+    flex-shrink:0;
+  }
+  .brand h1{font-size:16px; margin:0; font-weight:700; letter-spacing:-0.01em;}
+  .brand p{display:none;}
+  .klasnaam-field{
+    display:flex; align-items:center; gap:8px;
+  }
+  .klasnaam-field input{
+    font-family:"Space Grotesk", sans-serif; font-weight:600; font-size:14px;
+    border:1.5px solid var(--line-strong); border-radius:8px; padding:6px 11px;
+    background:var(--surface); min-width:180px; color:var(--ink);
+  }
+  .klasnaam-field input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .topbar-actions{display:flex; gap:8px; align-items:center;}
+
+  /* ---------- buttons ---------- */
+  button{ cursor:pointer; border:none; font-size:13.5px; }
+  .btn{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:7px 13px; border-radius:8px; font-weight:600;
+    background:var(--surface); color:var(--ink); border:1.5px solid var(--line-strong);
+    transition:transform .06s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:hover{border-color:var(--accent); background: var(--accent-soft);}
+  .btn:active{transform:scale(0.97);}
+  .btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .btn-primary{ background:var(--board); color:var(--chalk); border-color:var(--board);}
+  .btn-primary:hover{ background:var(--board-dark); border-color:var(--board-dark);}
+  .btn-ghost{ background:transparent; border-color:transparent; color:var(--muted); padding:6px 8px;}
+  .btn-ghost:hover{ background: var(--accent-soft); color:var(--ink);}
+  .btn-sm{ padding:5px 9px; font-size:12px; border-radius:6px;}
+  .btn-danger{ color:var(--rose); }
+  .btn-danger:hover{ background:var(--rose-bg); border-color:var(--rose); }
+  .btn[disabled]{opacity:0.45; cursor:not-allowed;}
+
+  /* ---------- layout grid ---------- */
+  .layout-grid{
+    display:grid; grid-template-columns: 340px 1fr; gap:16px; align-items:start;
+  }
+  @media (max-width: 1060px){ .layout-grid{grid-template-columns:1fr;} }
+
+  .col-title{
+    font-size:12.5px; text-transform:uppercase; letter-spacing:0.08em; font-weight:700;
+    color:var(--board); margin:0 0 8px; padding-left:2px;
+  }
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow: var(--shadow); padding:12px 14px 14px;
+  }
+  .card + .card{margin-top:12px;}
+  .card h2{
+    font-size:12px; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;
+    color:var(--muted); margin:0 0 9px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .card h2 .count{
+    font-size:11px; background:var(--accent-soft); color:var(--accent); padding:2px 8px; border-radius:20px;
+    font-weight:700; letter-spacing:0;
+  }
+
+  /* ---------- import ---------- */
+  textarea.paste-area{
+    width:100%; min-height:50px; resize:vertical; border:1.5px dashed var(--line-strong);
+    border-radius:8px; padding:9px 10px; font-family:ui-monospace, "SF Mono", Menlo, monospace;
+    font-size:12.5px; color:var(--ink); background:#FCFBF8;
+  }
+  textarea.paste-area:focus{outline:2px solid var(--accent); outline-offset:1px; border-style:solid;}
+  .paste-hint{font-size:11.5px; color:var(--muted); margin-top:5px; line-height:1.4;}
+  .add-row{ display:flex; gap:6px; margin-top:10px;}
+  .add-row input{
+    flex:1; border:1.5px solid var(--line-strong); border-radius:8px; padding:8px 10px; font-size:13.5px;
+  }
+  .add-row input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+
+  /* ---------- student list ---------- */
+  .student-list{ margin-top:14px; display:flex; flex-direction:column; gap:6px; max-height:520px; overflow-y:auto; padding-right:2px;}
+  .student-row{
+    border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:#FCFBF8;
+  }
+  .student-row.is-open{ background:var(--surface); border-color:var(--line-strong); }
+  .student-row-main{ display:flex; align-items:center; gap:8px; }
+  .nr-input{
+    width:34px; flex-shrink:0; border:1.5px solid var(--line-strong); border-radius:6px; text-align:center;
+    font-size:12px; font-weight:700; padding:4px 2px; color:var(--muted); background:#FCFBF8;
+  }
+  .nr-input:focus{ outline:2px solid var(--accent); outline-offset:1px; color:var(--ink); }
+  .student-name-input{
+    flex:1; border:none; background:transparent; font-weight:600; font-size:13.5px; color:var(--ink);
+    padding:3px 2px; border-radius:4px;
+  }
+  .student-name-input:focus{outline:2px solid var(--accent); background:var(--accent-soft);}
+  .tag-toggle{
+    font-size:11px; font-weight:700; padding:4px 8px; border-radius:20px; border:1.5px solid var(--line-strong);
+    background:var(--surface); color:var(--muted); white-space:nowrap;
+  }
+  .tag-toggle.active-vooraan{ background:var(--amber-bg); border-color:var(--amber); color:var(--amber); }
+  .tag-toggle.active-apart{ background:var(--rose-bg); border-color:var(--rose); color:var(--rose); }
+  .student-row-details{ margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); font-size:12.5px;}
+  .details-label{ font-weight:700; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:5px; display:block;}
+  .nietnaast-list{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px;}
+  .nietnaast-chip{
+    font-size:11.5px; background:var(--rose-bg); color:var(--rose); border:1px solid var(--rose);
+    padding:3px 7px 3px 9px; border-radius:20px; display:flex; align-items:center; gap:4px; font-weight:600;
+  }
+  .nietnaast-chip button{ background:none; color:var(--rose); font-size:12px; line-height:1; padding:0; font-weight:800;}
+  select.nietnaast-select{
+    width:100%; padding:6px 8px; border:1.5px solid var(--line-strong); border-radius:6px; font-size:12.5px; margin-bottom:8px; background:var(--surface);
+  }
+  textarea.opmerking-input{
+    width:100%; min-height:40px; border:1.5px solid var(--line-strong); border-radius:6px; padding:6px 8px;
+    font-size:12.5px; font-family:inherit; resize:vertical;
+  }
+  .row-footer{ display:flex; justify-content:flex-end; margin-top:6px;}
+  .empty-msg{ text-align:center; color:var(--muted); font-size:12.5px; padding:18px 8px; border:1.5px dashed var(--line-strong); border-radius:8px;}
+
+  /* ---------- opstelling panel ---------- */
+  .layout-switch{ display:flex; gap:6px; flex-wrap:wrap; }
+  .layout-switch-row{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-bottom:10px; justify-content:space-between;
+  }
+  .layout-switch-label{ font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; }
+  .layout-btn{
+    padding:6px 11px; border-radius:8px; border:1.5px solid var(--line-strong); background:var(--surface);
+    font-weight:700; font-size:12.5px; color:var(--ink); display:flex; flex-direction:column; align-items:flex-start; gap:0px;
+  }
+  .layout-btn small{ font-weight:500; color:var(--muted); font-size:10px;}
+  .layout-btn.active{ background:var(--board); border-color:var(--board); color:var(--chalk);}
+  .layout-btn.active small{ color: #cfe0d5; }
+
+  .rows-control{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); font-weight:600; flex-shrink:0;}
+  .rows-control button{
+    width:24px; height:24px; border-radius:6px; border:1.5px solid var(--line-strong); background:var(--surface); font-weight:700; font-size:13px; color:var(--ink);
+  }
+  .rows-control span{min-width:14px; text-align:center; color:var(--ink); font-weight:700;}
+
+  .toolbar-actions{ display:flex; gap:6px; flex-wrap:wrap; margin:10px 0 2px; }
+
+  .warnings{
+    background:var(--amber-bg); border:1px solid var(--amber); color:#7A4A0F; border-radius:8px;
+    padding:6px 10px; font-size:12px; margin:6px 0; display:none;
+  }
+  .warnings.show{display:block;}
+  .warnings ul{margin:3px 0 0; padding-left:16px;}
+
+  /* ---------- tray ---------- */
+  .tray{
+    display:flex; flex-wrap:wrap; gap:8px; min-height:36px; padding:7px; border:1.5px dashed var(--line-strong);
+    border-radius:8px; background:#FCFBF8; margin:6px 0 2px;
+  }
+  .tray.drag-over{ border-color:var(--accent); background:var(--accent-soft); }
+  .tray-empty-hint{ font-size:11.5px; color:var(--muted); padding:4px 4px; width:100%;}
+  .tray-chip{
+    width:70px; height:50px; flex:0 0 auto; position:relative;
+    background:var(--chip-grey); border:1.5px solid var(--chip-grey-border); border-radius:6.5px;
+    font-size:11px; font-weight:700; line-height:1.15; color:var(--ink);
+    cursor:grab; display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:2px 4px 2px; word-break:break-word;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.05);
+  }
+  .tray-chip:active{cursor:grabbing;}
+  .tray-chip.tag-vooraan{ background:var(--amber-bg); border-color:var(--amber); }
+  .tray-chip.tag-apart{ background:var(--rose-bg); border-color:var(--rose); }
+  .tray-chip-nr{
+    position:absolute; top:3px; left:4px; font-size:8.5px; font-weight:700;
+    color:var(--muted); line-height:1;
+  }
+
+  .tray-vertical{ align-content:flex-start; }
+  .tray-vertical .tray-empty-hint{ text-align:center; }
+
+  /* ---------- seat grid ---------- */
+  .grid-wrap{
+    background: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(35,70,52,0.035) 28px), var(--surface);
+    border:1px solid var(--line); border-radius:12px; padding:18px 16px 16px; overflow-x:auto;
+  }
+  .seat-rows{ display:flex; flex-direction:column-reverse; gap:11px; align-items:center; min-width:min-content;}
+  .seat-row{ display:flex; gap:20px; align-items:center; }
+  .seat-group{ display:flex; gap:7px; }
+  .seat{
+    width:70px; height:50px; border-radius:8px; border:1.5px dashed var(--line-strong);
+    background:#FCFBF8; display:flex; align-items:center; justify-content:center; position:relative;
+    transition:border-color .12s, background .12s;
+  }
+  .seat.drag-over{ border-color:var(--accent); border-style:solid; background:var(--accent-soft); }
+  .seat.occupied{ border-style:solid; border-color:var(--line-strong); background:var(--surface); }
+  .seat-chip{
+    width:100%; height:100%; border-radius:6.5px; background:var(--chip-grey); border:1.5px solid var(--chip-grey-border);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; cursor:grab;
+    font-size:11px; font-weight:700; text-align:center; padding:2px 4px; position:relative; color:var(--ink);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.05);
+  }
+  .seat-chip:active{cursor:grabbing;}
+  .seat-chip.tag-vooraan{ border-color:var(--amber); background:var(--amber-bg); }
+  .seat-chip.tag-apart{ border-color:var(--rose); background:var(--rose-bg); }
+  .seat-chip .name{ line-height:1.15; word-break:break-word; }
+  .seat-chip .remove-btn{
+    position:absolute; top:-7px; right:-7px; width:18px;height:18px;border-radius:50%;
+    background:var(--ink); color:#fff; font-size:11px; line-height:1; display:flex; align-items:center; justify-content:center;
+    opacity:0; transition:opacity .12s; border:1.5px solid var(--surface);
+  }
+  .seat-chip:hover .remove-btn{opacity:1;}
+  .seat-index{ position:absolute; bottom:2px; right:4px; font-size:8.5px; color:var(--line-strong); font-weight:600;}
+
+  .bord{
+    margin:16px auto 0; background: var(--board); color:var(--chalk); text-align:center;
+    padding:10px 0; border-radius:8px; font-weight:700; letter-spacing:0.18em; font-size:12px;
+    box-shadow: inset 0 0 0 3px rgba(242,239,224,0.08), 0 3px 10px rgba(26,54,42,0.25);
+    width:55%; min-width:180px;
+  }
+
+  .legend{ display:flex; gap:16px; flex-wrap:wrap; font-size:11.5px; color:var(--muted); margin-top:8px; }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend .sw{width:11px;height:11px;border-radius:3px;display:inline-block;border:1.5px solid var(--line-strong);}
+  .sw.vooraan{background:var(--amber-bg); border-color:var(--amber);}
+  .sw.apart{background:var(--rose-bg); border-color:var(--rose);}
+
+  /* ---------- confirm modal ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(36,38,31,0.45); z-index:1000;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:var(--surface); border-radius:12px; padding:20px 22px; max-width:380px; width:100%;
+    box-shadow:0 10px 40px rgba(0,0,0,0.25);
+  }
+  .modal-box p{ margin:0 0 16px; font-size:13.5px; color:var(--ink); line-height:1.5; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:8px; }
+
+  .modal-box-wide{
+    max-width:640px; max-height:88vh; display:flex; flex-direction:column; padding:0;
+  }
+  .modal-box-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px; border-bottom:1px solid var(--line); flex-shrink:0;
+  }
+  .modal-box-header h2{ font-size:15px; font-weight:700; }
+  .modal-box-scroll{ overflow-y:auto; padding:14px 18px 18px; }
+  .modal-box-scroll .card{ padding:12px 14px 14px; }
+  .modal-box-scroll .card + .card{ margin-top:12px; }
+
+  footer.foot{ text-align:center; color:var(--muted); font-size:11.5px; margin-top:18px; }
+
+  .warnings.notice-success{
+    background:#E1F0E4; border-color:#3D7A4F; color:#1F4A2C;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">KO</div>
+      <div>
+        <h1>Klasopstelling</h1>
+        <p>Sleep leerlingen naar hun plaats &middot; alles blijft lokaal op dit toestel</p>
+      </div>
+    </div>
+    <div class="klasnaam-field">
+      <label for="klasnaam" style="font-size:11.5px; color:var(--muted); font-weight:600;">Klasgroep</label>
+      <input id="klasnaam" type="text" placeholder="bv. 3A" />
+    </div>
+    <div class="topbar-actions">
+      <button class="btn" id="btnExportPDF">📄 Genereer PDF</button>
+      <button class="btn btn-ghost btn-danger" id="btnResetAll">Alles wissen</button>
+    </div>
+  </header>
+
+  <div class="layout-grid">
+    <!-- LEFT: niet geplaatst (blokjes) -->
+    <div>
+      <h3 class="col-title">Invoer leerlingen</h3>
+      <div class="card">
+        <div id="trayGroup">
+          <h2>Niet geplaatst <span class="count" id="trayCount">0</span></h2>
+          <div class="tray tray-vertical" id="tray"></div>
+        </div>
+        <div class="empty-msg" id="noStudentsHint" style="margin-bottom:10px;">Nog geen leerlingen ingevoerd. Klik hieronder om te starten.</div>
+        <button class="btn btn-sm" id="btnManageStudents" style="width:100%; justify-content:center; margin-top:10px;">👥 Leerlingen invoeren <span id="manageBtnCount" style="opacity:0.7;">(0)</span></button>
+      </div>
+    </div>
+
+    <!-- RIGHT: opstelling -->
+    <div>
+      <h3 class="col-title">Plaatsing</h3>
+      <div class="card">
+        <h2>Opstelling</h2>
+
+        <div class="layout-switch-row">
+          <div class="layout-switch" id="layoutSwitch"></div>
+          <div class="rows-control">
+            Rijen:
+            <button id="rowsMinus" aria-label="Minder rijen">–</button>
+            <span id="rowsValue">4</span>
+            <button id="rowsPlus" aria-label="Meer rijen">+</button>
+          </div>
+        </div>
+
+        <div class="toolbar-actions">
+          <button class="btn btn-sm" id="btnByNumber">🔢 Plaatsing op nummer</button>
+          <button class="btn btn-sm btn-ghost" id="btnClearSeats">Alle plaatsen leegmaken</button>
+        </div>
+
+        <div class="warnings" id="warnings"></div>
+
+        <div class="grid-wrap">
+          <div class="seat-rows" id="seatRows"></div>
+          <div class="bord">BORD</div>
+        </div>
+
+        <div class="legend">
+          <span><i class="sw vooraan"></i> vooraan</span>
+          <span><i class="sw apart"></i> apart</span>
+          <span>Sleep een naam naar een plaats. Sleep terug naar "niet geplaatst" om te verwijderen.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">Studieplanner-serie &middot; alle gegevens blijven in je browser (localStorage), er wordt niets verstuurd.</footer>
+
+  <div class="modal-overlay" id="studentModalOverlay">
+    <div class="modal-box modal-box-wide">
+      <div class="modal-box-header">
+        <h2 style="margin:0;">Leerlingen invoeren</h2>
+        <button class="btn-ghost btn-sm" id="studentModalClose" aria-label="Sluiten" style="font-size:18px; line-height:1;">×</button>
+      </div>
+      <div class="modal-box-scroll">
+        <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+          <h2>Plakken of typen</h2>
+          <textarea class="paste-area" id="pasteArea" placeholder="Plak hier namen uit Excel (kolommen: naam, vooraan Ja/Nee, restricties) — of typ 1 naam per lijn."></textarea>
+          <div class="paste-hint">Tip: kopieer rechtstreeks een kolom (of 3 kolommen: naam / vooraan / restricties) uit Excel en plak hier.</div>
+          <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+            <button class="btn btn-sm btn-primary" id="btnImport">Toevoegen aan lijst</button>
+          </div>
+          <div class="add-row">
+            <input type="text" id="quickAddInput" placeholder="Snel 1 leerling toevoegen…" />
+            <button class="btn btn-sm" id="btnQuickAdd">+ Toevoegen</button>
+          </div>
+        </div>
+
+        <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+          <h2>Leerlingenlijst <span class="count" id="studentCount">0</span></h2>
+          <div class="student-list" id="studentList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <p id="modalMessage"></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modalCancel">Annuleren</button>
+        <button class="btn btn-primary" id="modalConfirm">Bevestigen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ CONFIG ============ */
+  var LAYOUTS = {
+    "opst232": { key:"opst232", label:"2-3-2", sub:"groepen 2-3-2",   groups:[2,3,2] },
+    "opst222": { key:"opst222", label:"2-2-2", sub:"3 groepen van 2", groups:[2,2,2] },
+    "opst33":  { key:"opst33",  label:"3-3",   sub:"2 groepen van 3", groups:[3,3] },
+    "opst44":  { key:"opst44",  label:"4-4",   sub:"2 groepen van 4", groups:[4,4] }
+  };
+  var STORAGE_KEY = "klasopstelling_v2";
+  var MAX_EXTRA_ROWS = 8;
+
+  /* ============ STATE ============ */
+  var state = {
+    klasNaam: "",
+    students: [],           // {id, naam, vooraan, apart, nietNaast:[ids], opmerking}
+    layout: "opst232",
+    layoutRows: { "opst222":5, "opst33":5, "opst44":4, "opst232":4 },
+    seatAssignment: {}       // seatId -> studentId  (only for the ACTIVE layout)
+  };
+  var openRowId = null; // which student's detail panel is open
+
+  /* ============ UTIL ============ */
+  function uid(){ return "s_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+  function byId(arr, id){ return arr.find(function(x){ return x.id===id; }); }
+  function studentsById(){
+    var map = {};
+    state.students.forEach(function(s){ map[s.id]=s; });
+    return map;
+  }
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+  function escapeHtml(str){
+    return String(str==null?"":str).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ /* ignore quota errors */ }
+  }
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      var parsed = JSON.parse(raw);
+      if(parsed && typeof parsed === "object"){
+        state.klasNaam = parsed.klasNaam || "";
+        state.students = Array.isArray(parsed.students) ? parsed.students.map(function(s, idx){
+          return {
+            id: s.id || uid(),
+            naam: s.naam || "",
+            nr: (typeof s.nr === "number" && !isNaN(s.nr)) ? s.nr : (idx+1),
+            vooraan: !!s.vooraan,
+            apart: !!s.apart,
+            nietNaast: Array.isArray(s.nietNaast) ? s.nietNaast : [],
+            opmerking: s.opmerking || ""
+          };
+        }) : [];
+        state.layout = LAYOUTS[parsed.layout] ? parsed.layout : "opst232";
+        state.layoutRows = Object.assign({"opst222":5,"opst33":5,"opst44":4,"opst232":4}, parsed.layoutRows||{});
+        state.seatAssignment = parsed.seatAssignment && typeof parsed.seatAssignment==="object" ? parsed.seatAssignment : {};
+      }
+    }catch(e){ /* ignore corrupt storage */ }
+  }
+
+  /* ============ SEAT GEOMETRY ============ */
+  function rowCapacity(layoutKey){
+    return LAYOUTS[layoutKey].groups.reduce(function(a,b){return a+b;},0);
+  }
+  function buildSeats(layoutKey, rows){
+    var groups = LAYOUTS[layoutKey].groups;
+    var seats = [];
+    for(var r=0;r<rows;r++){
+      for(var g=0; g<groups.length; g++){
+        for(var s=0; s<groups[g]; s++){
+          seats.push({ id: r+"_"+g+"_"+s, row:r, group:g, seatIndex:s, groupSize:groups[g] });
+        }
+      }
+    }
+    return seats;
+  }
+  function neighborsOf(seat, seats){
+    return seats.filter(function(o){
+      return o.row===seat.row && o.group===seat.group && Math.abs(o.seatIndex-seat.seatIndex)===1;
+    });
+  }
+
+  /* ============ CONSTRAINT CHECK ============ */
+  function isSeatOkForStudent(seat, student, assignment, sById, seats){
+    var nbs = neighborsOf(seat, seats);
+    for(var i=0;i<nbs.length;i++){
+      var occId = assignment[nbs[i].id];
+      if(!occId) continue;
+      var occ = sById[occId];
+      if(!occ) continue;
+      if(student.apart) return false;
+      if(occ.apart) return false;
+      if(student.nietNaast && student.nietNaast.indexOf(occId) !== -1) return false;
+      if(occ.nietNaast && occ.nietNaast.indexOf(student.id) !== -1) return false;
+    }
+    return true;
+  }
+
+  /* ============ PLAATSING OP NUMMER ============ */
+  function placeByNumber(){
+    if(!state.students.length) return;
+    if(Object.keys(state.seatAssignment).length){
+      showConfirmModal("Dit vult de volledige opstelling in op volgorde van nummer (voor naar achter, links naar rechts) en overschrijft de huidige plaatsing. Doorgaan?", function(){
+        doPlaceByNumber();
+      });
+      return;
+    }
+    doPlaceByNumber();
+  }
+  function doPlaceByNumber(){
+    var sorted = state.students.slice().sort(function(a,b){
+      var na = (typeof a.nr==="number") ? a.nr : Infinity;
+      var nb = (typeof b.nr==="number") ? b.nr : Infinity;
+      if(na!==nb) return na-nb;
+      return a.naam.localeCompare(b.naam,'nl');
+    });
+
+    var rows = state.layoutRows[state.layout];
+    var seats = buildSeats(state.layout, rows);
+    while(seats.length < sorted.length){
+      rows++;
+      seats = buildSeats(state.layout, rows);
+    }
+    seats.sort(function(a,b){ return a.row-b.row || a.group-b.group || a.seatIndex-b.seatIndex; });
+
+    var assignment = {};
+    sorted.forEach(function(s, idx){ assignment[seats[idx].id] = s.id; });
+
+    state.layoutRows[state.layout] = rows;
+    state.seatAssignment = assignment;
+    showWarnings(["Plaatsing gebeurde strikt op volgnummer — voorkeuren (vooraan/apart/niet naast) zijn hierbij niet gegarandeerd. Sleep leerlingen indien nodig naar een andere plaats."]);
+    saveState();
+    render();
+  }
+
+  /* ============ REFLOW ON LAYOUT SWITCH (compact: no gaps within a row unless needed for "apart") ============ */
+  function readingOrderOfCurrentlySeated(){
+    var oldSeats = buildSeats(state.layout, state.layoutRows[state.layout]);
+    var oldById = {};
+    oldSeats.forEach(function(s){ oldById[s.id]=s; });
+    var seatedList = Object.keys(state.seatAssignment).map(function(seatId){
+      return { seat: oldById[seatId], studentId: state.seatAssignment[seatId] };
+    }).filter(function(e){ return e.seat; });
+    seatedList.sort(function(a,b){
+      return a.seat.row-b.seat.row || a.seat.group-b.seat.group || a.seat.seatIndex-b.seat.seatIndex;
+    });
+    return seatedList.map(function(e){ return e.studentId; });
+  }
+
+  /* Greedily assigns students (in the given order) to the earliest valid seat (reading order).
+     Vooraan students are processed first so they claim front-row seats. Because we always take the
+     first valid seat, seats only stay empty within an occupied row when a constraint (apart /
+     niet-naast) genuinely requires it — never as a random leftover gap. Returns null if some
+     student has no valid seat left (caller should grow the number of rows and retry). */
+  function tryAssignOrdered(orderedIds, seatsSorted, sById){
+    var assignment = {};
+    var vooraanIds = orderedIds.filter(function(id){ return sById[id] && sById[id].vooraan; });
+    var restIds = orderedIds.filter(function(id){ return !(sById[id] && sById[id].vooraan); });
+    var order = vooraanIds.concat(restIds);
+    for(var i=0;i<order.length;i++){
+      var id = order[i];
+      var student = sById[id];
+      if(!student) continue;
+      var candidates = seatsSorted.filter(function(seat){ return !assignment[seat.id]; });
+      candidates = candidates.filter(function(seat){ return isSeatOkForStudent(seat, student, assignment, sById, seatsSorted); });
+      if(student.vooraan && candidates.length){
+        var minRow = Math.min.apply(null, candidates.map(function(c){return c.row;}));
+        candidates = candidates.filter(function(c){ return c.row===minRow; });
+      }
+      if(!candidates.length) return null;
+      assignment[candidates[0].id] = id; // candidates preserved reading-order (row, group, seatIndex)
+    }
+    return assignment;
+  }
+
+  function computeReflowForLayout(newKey){
+    var orderedIds = readingOrderOfCurrentlySeated();
+    var sById = studentsById();
+    var minRows = Math.max(1, Math.ceil(Math.max(orderedIds.length,1) / rowCapacity(newKey)));
+    var warnings = [];
+    var rows = minRows, assignment = null;
+
+    for(var extra=0; extra<=MAX_EXTRA_ROWS; extra++){
+      var seats = buildSeats(newKey, minRows+extra);
+      seats.sort(function(a,b){ return a.row-b.row || a.group-b.group || a.seatIndex-b.seatIndex; });
+      var result = tryAssignOrdered(orderedIds, seats, sById);
+      if(result){ assignment = result; rows = minRows+extra; break; }
+    }
+    if(!assignment){
+      rows = minRows+MAX_EXTRA_ROWS;
+      var fallbackSeats = buildSeats(newKey, rows);
+      fallbackSeats.sort(function(a,b){ return a.row-b.row || a.group-b.group || a.seatIndex-b.seatIndex; });
+      assignment = {};
+      orderedIds.forEach(function(id, idx){ if(fallbackSeats[idx]) assignment[fallbackSeats[idx].id] = id; });
+      warnings.push("Niet alle plaatsingsvoorwaarden (apart / niet naast) konden voldaan worden bij het wisselen naar deze opstelling.");
+    }
+    return { rows: rows, assignment: assignment, warnings: warnings };
+  }
+
+  function switchLayout(newKey){
+    if(newKey === state.layout){ return; }
+    var res = computeReflowForLayout(newKey);
+    state.layout = newKey;
+    state.layoutRows[newKey] = res.rows;
+    state.seatAssignment = res.assignment;
+    showWarnings(res.warnings);
+    saveState();
+    render();
+  }
+
+
+  /* ============ STUDENT CRUD ============ */
+  function nextNr(){
+    var max = 0;
+    state.students.forEach(function(s){ if(typeof s.nr==="number" && s.nr>max) max=s.nr; });
+    return max+1;
+  }
+  function addStudent(naam, vooraan, opmerking){
+    naam = (naam||"").trim();
+    if(!naam) return null;
+    var st = { id: uid(), naam: naam, nr: nextNr(), vooraan: !!vooraan, apart:false, nietNaast: [], opmerking: opmerking||"" };
+    state.students.push(st);
+    return st;
+  }
+  function removeStudent(id){
+    state.students = state.students.filter(function(s){ return s.id!==id; });
+    state.students.forEach(function(s){
+      s.nietNaast = s.nietNaast.filter(function(x){ return x!==id; });
+    });
+    Object.keys(state.seatAssignment).forEach(function(seatId){
+      if(state.seatAssignment[seatId]===id) delete state.seatAssignment[seatId];
+    });
+    if(openRowId===id) openRowId = null;
+  }
+  function toggleNietNaast(idA, idB){
+    var a = byId(state.students, idA), b = byId(state.students, idB);
+    if(!a || !b) return;
+    var iA = a.nietNaast.indexOf(idB);
+    if(iA===-1){ a.nietNaast.push(idB); } else { a.nietNaast.splice(iA,1); }
+    var iB = b.nietNaast.indexOf(idA);
+    if(iA===-1){ if(iB===-1) b.nietNaast.push(idA); } else { if(iB!==-1) b.nietNaast.splice(iB,1); }
+  }
+
+  function parsePasteText(text){
+    var lines = text.split(/\r?\n/).map(function(l){return l.trim();}).filter(function(l){return l.length;});
+    var added = 0;
+    lines.forEach(function(line, idx){
+      var parts = line.indexOf("\t")!==-1 ? line.split("\t") : line.split(",");
+      var naam = (parts[0]||"").trim();
+      if(!naam) return;
+      if(idx===0 && naam.toLowerCase()==="naam"){ return; } // skip header row
+      var vooraanRaw = (parts[1]||"").trim().toLowerCase();
+      var vooraan = vooraanRaw==="ja" || vooraanRaw==="x" || vooraanRaw==="1" || vooraanRaw==="yes";
+      var restricties = (parts[2]||"").trim();
+      var st = addStudent(naam, vooraan, restricties);
+      if(st && restricties){
+        if(/apart/i.test(restricties)) st.apart = true;
+        var m = restricties.match(/niet naast\s+([a-zà-ÿ' -]+)/i);
+        if(m){
+          var targetName = m[1].trim().toLowerCase();
+          var target = state.students.find(function(s){ return s.id!==st.id && s.naam.trim().toLowerCase()===targetName; });
+          if(target) toggleNietNaast(st.id, target.id);
+        }
+      }
+      if(st) added++;
+    });
+    return added;
+  }
+
+  /* ============ RENDER ============ */
+  var els = {};
+  function cacheEls(){
+    ["klasnaam","pasteArea","btnImport","quickAddInput","btnQuickAdd","studentList","studentCount",
+     "layoutSwitch","rowsMinus","rowsPlus","rowsValue","btnByNumber","btnClearSeats","warnings",
+     "tray","trayCount","seatRows","btnExportPDF","btnResetAll",
+     "trayGroup","noStudentsHint",
+     "btnManageStudents","manageBtnCount","studentModalOverlay","studentModalClose",
+     "modalOverlay","modalMessage","modalCancel","modalConfirm"
+    ].forEach(function(id){ els[id] = document.getElementById(id); });
+  }
+
+  var modalConfirmCallback = null;
+  function showConfirmModal(message, onConfirm){
+    els.modalMessage.textContent = message;
+    modalConfirmCallback = onConfirm;
+    els.modalOverlay.classList.add("show");
+  }
+  function hideConfirmModal(){
+    els.modalOverlay.classList.remove("show");
+    modalConfirmCallback = null;
+  }
+  function bindModal(){
+    els.modalCancel.addEventListener("click", hideConfirmModal);
+    els.modalOverlay.addEventListener("click", function(e){
+      if(e.target === els.modalOverlay) hideConfirmModal();
+    });
+    els.modalConfirm.addEventListener("click", function(){
+      var cb = modalConfirmCallback;
+      hideConfirmModal();
+      if(typeof cb === "function") cb();
+    });
+    document.addEventListener("keydown", function(e){
+      if(e.key === "Escape" && els.modalOverlay.classList.contains("show")) hideConfirmModal();
+      if(e.key === "Escape" && els.studentModalOverlay.classList.contains("show")) hideStudentModal();
+    });
+
+    els.btnManageStudents.addEventListener("click", showStudentModal);
+    els.studentModalClose.addEventListener("click", hideStudentModal);
+    els.studentModalOverlay.addEventListener("click", function(e){
+      if(e.target === els.studentModalOverlay) hideStudentModal();
+    });
+  }
+  function showStudentModal(){ els.studentModalOverlay.classList.add("show"); }
+  function hideStudentModal(){ els.studentModalOverlay.classList.remove("show"); }
+
+  function showWarnings(list){
+    els.warnings.className = "warnings";
+    if(!list || !list.length){ els.warnings.classList.remove("show"); els.warnings.innerHTML=""; return; }
+    els.warnings.classList.add("show");
+    els.warnings.innerHTML = "<strong>Let op:</strong><ul>"+list.map(function(w){return "<li>"+escapeHtml(w)+"</li>";}).join("")+"</ul>";
+  }
+
+  var noticeTimer = null;
+  function showNotice(message, type){
+    if(noticeTimer){ clearTimeout(noticeTimer); noticeTimer = null; }
+    els.warnings.className = "warnings show notice-"+(type||"warning");
+    els.warnings.innerHTML = escapeHtml(message);
+    if(type === "success"){
+      noticeTimer = setTimeout(function(){
+        els.warnings.className = "warnings";
+        els.warnings.innerHTML = "";
+      }, 6000);
+    }
+  }
+
+  function render(){
+    els.klasnaam.value = state.klasNaam;
+    renderLayoutSwitch();
+    renderStudentList();
+    renderTray();
+    renderSeatGrid();
+    els.rowsValue.textContent = state.layoutRows[state.layout];
+    els.manageBtnCount.textContent = "("+state.students.length+")";
+
+    var hasStudents = state.students.length > 0;
+    els.trayGroup.style.display = hasStudents ? "" : "none";
+    els.noStudentsHint.style.display = hasStudents ? "none" : "";
+  }
+
+  function renderLayoutSwitch(){
+    els.layoutSwitch.innerHTML = "";
+    Object.keys(LAYOUTS).forEach(function(key){
+      var L = LAYOUTS[key];
+      var btn = document.createElement("button");
+      btn.className = "layout-btn" + (state.layout===key ? " active":"");
+      btn.innerHTML = L.label + "<small>"+L.sub+"</small>";
+      btn.addEventListener("click", function(){ switchLayout(key); });
+      els.layoutSwitch.appendChild(btn);
+    });
+  }
+
+  function renderStudentList(){
+    els.studentCount.textContent = state.students.length;
+    if(!state.students.length){
+      els.studentList.innerHTML = '<div class="empty-msg">Nog geen leerlingen. Plak of typ hierboven een lijst.</div>';
+      return;
+    }
+    var html = "";
+    state.students.slice().sort(function(a,b){
+      var na = (typeof a.nr==="number") ? a.nr : Infinity;
+      var nb = (typeof b.nr==="number") ? b.nr : Infinity;
+      if(na!==nb) return na-nb;
+      return a.naam.localeCompare(b.naam,'nl');
+    }).forEach(function(s){
+      var isOpen = openRowId===s.id;
+      html += '<div class="student-row'+(isOpen?" is-open":"")+'" data-id="'+s.id+'">';
+      html += '<div class="student-row-main">';
+      html += '<input type="number" class="nr-input" data-action="nr" data-id="'+s.id+'" value="'+(s.nr!=null?s.nr:"")+'" title="Volgnummer (voor plaatsing op nummer)" />';
+      html += '<input class="student-name-input" data-action="rename" data-id="'+s.id+'" value="'+escapeHtml(s.naam)+'" />';
+      html += '<button class="tag-toggle'+(s.vooraan?" active-vooraan":"")+'" data-action="vooraan" data-id="'+s.id+'">vooraan</button>';
+      html += '<button class="tag-toggle'+(s.apart?" active-apart":"")+'" data-action="apart" data-id="'+s.id+'">apart</button>';
+      html += '<button class="btn-ghost btn-sm" data-action="toggleOpen" data-id="'+s.id+'" title="Meer opties">⋯</button>';
+      html += '</div>';
+      if(isOpen){
+        html += '<div class="student-row-details">';
+        html += '<span class="details-label">Niet naast</span>';
+        html += '<div class="nietnaast-list">';
+        if(s.nietNaast.length){
+          s.nietNaast.forEach(function(otherId){
+            var other = byId(state.students, otherId);
+            if(!other) return;
+            html += '<span class="nietnaast-chip">'+escapeHtml(other.naam)+'<button data-action="removeNietNaast" data-id="'+s.id+'" data-other="'+otherId+'">×</button></span>';
+          });
+        } else {
+          html += '<span style="color:var(--muted); font-size:11.5px;">geen</span>';
+        }
+        html += '</div>';
+        var others = state.students.filter(function(o){ return o.id!==s.id && s.nietNaast.indexOf(o.id)===-1; })
+          .sort(function(a,b){return a.naam.localeCompare(b.naam,'nl');});
+        html += '<select class="nietnaast-select" data-action="addNietNaast" data-id="'+s.id+'">';
+        html += '<option value="">+ voeg leerling toe…</option>';
+        others.forEach(function(o){ html += '<option value="'+o.id+'">'+escapeHtml(o.naam)+'</option>'; });
+        html += '</select>';
+        html += '<span class="details-label">Opmerking</span>';
+        html += '<textarea class="opmerking-input" data-action="opmerking" data-id="'+s.id+'" placeholder="vrije notitie…">'+escapeHtml(s.opmerking)+'</textarea>';
+        html += '<div class="row-footer"><button class="btn btn-sm btn-danger" data-action="delete" data-id="'+s.id+'">Leerling verwijderen</button></div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    els.studentList.innerHTML = html;
+  }
+
+  function placedStudentIdSet(){
+    var set = {};
+    Object.keys(state.seatAssignment).forEach(function(seatId){ set[state.seatAssignment[seatId]] = true; });
+    return set;
+  }
+
+  function renderTray(){
+    var placed = placedStudentIdSet();
+    var unplaced = state.students.filter(function(s){ return !placed[s.id]; })
+      .sort(function(a,b){
+        var na = (typeof a.nr==="number") ? a.nr : Infinity;
+        var nb = (typeof b.nr==="number") ? b.nr : Infinity;
+        if(na!==nb) return na-nb;
+        return a.naam.localeCompare(b.naam,'nl');
+      });
+    els.trayCount.textContent = unplaced.length;
+    if(!unplaced.length){
+      els.tray.innerHTML = "";
+      return;
+    }
+    els.tray.innerHTML = unplaced.map(function(s){
+      var cls = "tray-chip"+(s.vooraan?" tag-vooraan":"")+(s.apart?" tag-apart":"");
+      var nrLabel = (typeof s.nr==="number") ? '<span class="tray-chip-nr">'+s.nr+'</span>' : "";
+      return '<div class="'+cls+'" draggable="true" data-student-id="'+s.id+'" title="'+escapeHtml(s.naam)+'">'+nrLabel+escapeHtml(s.naam)+'</div>';
+    }).join("");
+  }
+
+  function renderSeatGrid(){
+    var layout = LAYOUTS[state.layout];
+    var rows = state.layoutRows[state.layout];
+    var seats = buildSeats(state.layout, rows);
+    var sById = studentsById();
+
+    var byRow = {};
+    seats.forEach(function(s){ byRow[s.row] = byRow[s.row] || {}; byRow[s.row][s.group] = byRow[s.row][s.group]||[]; byRow[s.row][s.group].push(s); });
+
+    var html = "";
+    for(var r=0; r<rows; r++){
+      html += '<div class="seat-row" data-row="'+r+'">';
+      layout.groups.forEach(function(size, g){
+        html += '<div class="seat-group">';
+        var groupSeats = (byRow[r] && byRow[r][g]) || [];
+        groupSeats.forEach(function(seat){
+          var studentId = state.seatAssignment[seat.id];
+          var student = studentId ? sById[studentId] : null;
+          html += '<div class="seat'+(student?" occupied":"")+'" data-seat-id="'+seat.id+'">';
+          if(student){
+            var cls = "seat-chip"+(student.vooraan?" tag-vooraan":"")+(student.apart?" tag-apart":"");
+            var titleParts = [];
+            if(student.opmerking) titleParts.push(student.opmerking);
+            html += '<div class="'+cls+'" draggable="true" data-student-id="'+student.id+'" data-seat-id="'+seat.id+'" title="'+escapeHtml(titleParts.join(" · "))+'">';
+            html += '<span class="name">'+escapeHtml(student.naam)+'</span>';
+            html += '<button class="remove-btn" data-action="unplace" data-seat-id="'+seat.id+'" title="Verwijder van plaats">×</button>';
+            html += '</div>';
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    els.seatRows.innerHTML = html;
+  }
+
+  /* ============ EVENTS: student list ============ */
+  document.addEventListener("input", function(e){
+    if(e.target.matches('input[data-action="rename"]')){
+      var st = byId(state.students, e.target.dataset.id);
+      if(st){ st.naam = e.target.value; saveState(); renderTray(); renderSeatGrid(); }
+    }
+    if(e.target.matches('textarea[data-action="opmerking"]')){
+      var st2 = byId(state.students, e.target.dataset.id);
+      if(st2){ st2.opmerking = e.target.value; saveState(); }
+    }
+    if(e.target.matches('input[data-action="nr"]')){
+      var st3 = byId(state.students, e.target.dataset.id);
+      if(st3){
+        var v = parseInt(e.target.value, 10);
+        st3.nr = isNaN(v) ? null : v;
+        saveState();
+      }
+    }
+  });
+
+  document.addEventListener("change", function(e){
+    if(e.target.matches('select[data-action="addNietNaast"]')){
+      var id = e.target.dataset.id, otherId = e.target.value;
+      if(otherId){ toggleNietNaast(id, otherId); saveState(); render(); }
+    }
+  });
+
+  document.addEventListener("click", function(e){
+    var t = e.target;
+    var action = t.dataset ? t.dataset.action : null;
+    if(!action) return;
+
+    if(action==="vooraan"){
+      var s1 = byId(state.students, t.dataset.id); if(s1){ s1.vooraan = !s1.vooraan; saveState(); render(); }
+    } else if(action==="apart"){
+      var s2 = byId(state.students, t.dataset.id); if(s2){ s2.apart = !s2.apart; saveState(); render(); }
+    } else if(action==="toggleOpen"){
+      openRowId = (openRowId===t.dataset.id) ? null : t.dataset.id;
+      renderStudentList();
+    } else if(action==="delete"){
+      showConfirmModal("Deze leerling verwijderen uit de lijst?", function(){
+        removeStudent(t.dataset.id); saveState(); render();
+      });
+    } else if(action==="removeNietNaast"){
+      toggleNietNaast(t.dataset.id, t.dataset.other); saveState(); render();
+    } else if(action==="unplace"){
+      var seatId = t.dataset.seatId;
+      delete state.seatAssignment[seatId];
+      saveState(); renderTray(); renderSeatGrid();
+    }
+  });
+
+  /* ============ IMPORT / QUICK ADD ============ */
+  function bindTopLevel(){
+    els.btnImport.addEventListener("click", function(){
+      var text = els.pasteArea.value;
+      var n = parsePasteText(text);
+      els.pasteArea.value = "";
+      saveState(); render();
+      if(n===0){ /* no-op, nothing valid pasted */ }
+    });
+    els.btnQuickAdd.addEventListener("click", function(){
+      var v = els.quickAddInput.value.trim();
+      if(v){ addStudent(v,false,""); els.quickAddInput.value=""; saveState(); render(); }
+    });
+    els.quickAddInput.addEventListener("keydown", function(e){
+      if(e.key==="Enter"){ els.btnQuickAdd.click(); }
+    });
+    els.klasnaam.addEventListener("input", function(){
+      state.klasNaam = els.klasnaam.value; saveState();
+    });
+    els.rowsMinus.addEventListener("click", function(){
+      var cur = state.layoutRows[state.layout];
+      if(cur<=1) return;
+      state.layoutRows[state.layout] = cur-1;
+      // unplace students that fall outside new row range
+      var seats = buildSeats(state.layout, cur-1);
+      var validIds = {}; seats.forEach(function(s){validIds[s.id]=true;});
+      Object.keys(state.seatAssignment).forEach(function(seatId){
+        if(!validIds[seatId]) delete state.seatAssignment[seatId];
+      });
+      saveState(); render();
+    });
+    els.rowsPlus.addEventListener("click", function(){
+      state.layoutRows[state.layout] = state.layoutRows[state.layout]+1;
+      saveState(); render();
+    });
+    els.btnByNumber.addEventListener("click", placeByNumber);
+    els.btnClearSeats.addEventListener("click", function(){
+      if(!Object.keys(state.seatAssignment).length) return;
+      showConfirmModal("Alle leerlingen terug naar 'niet geplaatst'?", function(){
+        state.seatAssignment = {}; showWarnings([]); saveState(); render();
+      });
+    });
+    els.btnResetAll.addEventListener("click", function(){
+      showConfirmModal("Dit wist de klasnaam, alle leerlingen en de opstelling. Doorgaan?", function(){
+        state = { klasNaam:"", students:[], layout:"opst232", layoutRows:{"opst222":5,"opst33":5,"opst44":4,"opst232":4}, seatAssignment:{} };
+        openRowId = null;
+        showWarnings([]); saveState(); render();
+      });
+    });
+    els.btnExportPDF.addEventListener("click", exportPDF);
+  }
+
+  /* ============ DRAG & DROP ============ */
+  var dragData = null; // {studentId, fromSeatId or null}
+
+  document.addEventListener("dragstart", function(e){
+    var chip = e.target.closest("[data-student-id]");
+    if(!chip) return;
+    dragData = { studentId: chip.dataset.studentId, fromSeatId: chip.dataset.seatId || null };
+    e.dataTransfer.effectAllowed = "move";
+    try{ e.dataTransfer.setData("text/plain", dragData.studentId); }catch(err){}
+  });
+
+  document.addEventListener("dragover", function(e){
+    var seat = e.target.closest(".seat");
+    var tray = e.target.closest("#tray");
+    if(seat || tray){ e.preventDefault(); }
+    if(seat) seat.classList.add("drag-over");
+    if(tray) tray.classList.add("drag-over");
+  });
+  document.addEventListener("dragleave", function(e){
+    var seat = e.target.closest(".seat");
+    var tray = e.target.closest("#tray");
+    if(seat) seat.classList.remove("drag-over");
+    if(tray) tray.classList.remove("drag-over");
+  });
+
+  document.addEventListener("drop", function(e){
+    var seat = e.target.closest(".seat");
+    var tray = e.target.closest("#tray");
+    if(!seat && !tray) return;
+    e.preventDefault();
+    if(seat) seat.classList.remove("drag-over");
+    if(tray) tray.classList.remove("drag-over");
+    if(!dragData) return;
+
+    if(tray){
+      if(dragData.fromSeatId){ delete state.seatAssignment[dragData.fromSeatId]; }
+      saveState(); renderTray(); renderSeatGrid();
+      dragData = null; return;
+    }
+
+    if(seat){
+      var targetSeatId = seat.dataset.seatId;
+      var occupantId = state.seatAssignment[targetSeatId];
+      if(dragData.fromSeatId === targetSeatId){ dragData=null; return; }
+
+      if(dragData.fromSeatId){
+        // moving from another seat: swap or move
+        if(occupantId){
+          state.seatAssignment[dragData.fromSeatId] = occupantId;
+        } else {
+          delete state.seatAssignment[dragData.fromSeatId];
+        }
+        state.seatAssignment[targetSeatId] = dragData.studentId;
+      } else {
+        // coming from tray
+        if(occupantId){
+          // bump occupant back to tray
+          delete state.seatAssignment[targetSeatId];
+        }
+        state.seatAssignment[targetSeatId] = dragData.studentId;
+      }
+      saveState(); renderTray(); renderSeatGrid();
+    }
+    dragData = null;
+  });
+
+  /* ============ IMAGE EXPORT (copy to clipboard, for pasting straight into an e-mail) ============ */
+  var CANVAS_COLORS = {
+    paper: "#F6F4EE", surface: "#FFFFFF", ink: "#24261F", muted: "#837D6C",
+    lineStrong: "#AFA894", board: "#234634", chalk: "#F2EFE0",
+    amber: "#C97A22", amberBg: "#FBEBD6", rose: "#A8455A", roseBg: "#F7E3E6",
+    chipGrey: "#E7E4DA", chipGreyBorder: "#AFA894", emptyBorder: "#D2CBB8"
+  };
+
+  function hexToRgb(hex){
+    hex = String(hex).replace("#","");
+    var n = parseInt(hex, 16);
+    return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+  }
+
+  /* Crops a canvas tightly around its actual drawn content (removes surrounding
+     background whitespace), so the seating chart fills the available print space
+     instead of leaving margins around it. Falls back to the original canvas if
+     anything goes wrong or nothing is found. */
+  function trimCanvasToContent(canvas, bgHex, paddingPx){
+    try{
+      var ctx = canvas.getContext("2d");
+      var w = canvas.width, h = canvas.height;
+      var data = ctx.getImageData(0, 0, w, h).data;
+      var bg = hexToRgb(bgHex);
+      var minX=w, minY=h, maxX=-1, maxY=-1;
+      var step = 2;
+      for(var y=0; y<h; y+=step){
+        var rowOffset = y*w*4;
+        for(var x=0; x<w; x+=step){
+          var idx = rowOffset + x*4;
+          var a = data[idx+3];
+          if(a < 10) continue;
+          var r = data[idx], g = data[idx+1], b = data[idx+2];
+          if(Math.abs(r-bg.r) > 8 || Math.abs(g-bg.g) > 8 || Math.abs(b-bg.b) > 8){
+            if(x<minX) minX=x;
+            if(x>maxX) maxX=x;
+            if(y<minY) minY=y;
+            if(y>maxY) maxY=y;
+          }
+        }
+      }
+      if(maxX < minX || maxY < minY) return canvas;
+      var pad = (paddingPx==null) ? 16 : paddingPx;
+      minX = Math.max(0, minX-pad);
+      minY = Math.max(0, minY-pad);
+      maxX = Math.min(w-1, maxX+pad);
+      maxY = Math.min(h-1, maxY+pad);
+      var tw = maxX-minX+1, th = maxY-minY+1;
+      var out = document.createElement("canvas");
+      out.width = tw; out.height = th;
+      var octx = out.getContext("2d");
+      octx.fillStyle = bgHex;
+      octx.fillRect(0, 0, tw, th);
+      octx.drawImage(canvas, minX, minY, tw, th, 0, 0, tw, th);
+      return out;
+    }catch(e){
+      return canvas;
+    }
+  }
+
+  function wrapCanvasText(ctx, text, maxWidth, maxLines){
+    var words = String(text||"").split(/\s+/).filter(Boolean);
+    var lines = [];
+    var current = "";
+    for(var i=0;i<words.length;i++){
+      var test = current ? current+" "+words[i] : words[i];
+      if(ctx.measureText(test).width > maxWidth && current){
+        lines.push(current);
+        current = words[i];
+        if(lines.length === maxLines-1){
+          // last allowed line: fit remaining words, ellipsis if needed
+          var rest = words.slice(i).join(" ");
+          while(ctx.measureText(rest+"…").width > maxWidth && rest.length>1){
+            rest = rest.slice(0, -1);
+          }
+          lines.push(rest + (rest.length < words.slice(i).join(" ").length ? "…" : ""));
+          current = "";
+          return lines;
+        }
+      } else {
+        current = test;
+      }
+    }
+    if(current) lines.push(current);
+    return lines.slice(0, maxLines);
+  }
+
+  function drawRoundedRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
+  }
+
+  function buildLayoutCanvas(layoutKey, rows, assignment, sById, klasNaam){
+    var layout = LAYOUTS[layoutKey];
+    var seats = buildSeats(layoutKey, rows);
+    var byRow = {};
+    seats.forEach(function(s){ byRow[s.row]=byRow[s.row]||{}; byRow[s.row][s.group]=byRow[s.row][s.group]||[]; byRow[s.row][s.group].push(s); });
+
+    var CELL_W = 148, CELL_H = 96, SEAT_GAP = 12, AISLE_GAP = 44, ROW_GAP = 20;
+    var PAD_X = 44, PAD_TOP = 92, PAD_BOTTOM = 34;
+    var BORD_H = 40, BORD_MARGIN_TOP = 24;
+
+    var rowWidth = layout.groups.reduce(function(sum,size){ return sum + size*CELL_W + (size-1)*SEAT_GAP; }, 0)
+      + (layout.groups.length-1)*AISLE_GAP;
+
+    var unplacedNames = state.students.filter(function(s){
+      return Object.keys(assignment).every(function(k){ return assignment[k]!==s.id; });
+    }).map(function(s){ return s.naam; });
+    var extraFooter = unplacedNames.length ? 30 : 0;
+
+    var cssWidth = rowWidth + PAD_X*2;
+    var cssHeight = PAD_TOP + rows*CELL_H + (rows-1)*ROW_GAP + BORD_MARGIN_TOP + BORD_H + PAD_BOTTOM + extraFooter;
+
+    var scale = 2; // crisp for pasting
+    var canvas = document.createElement("canvas");
+    canvas.width = Math.ceil(cssWidth*scale);
+    canvas.height = Math.ceil(cssHeight*scale);
+    var ctx = canvas.getContext("2d");
+    ctx.scale(scale, scale);
+
+    // background
+    ctx.fillStyle = CANVAS_COLORS.paper;
+    ctx.fillRect(0,0,cssWidth,cssHeight);
+
+    // title
+    ctx.fillStyle = CANVAS_COLORS.ink;
+    ctx.font = "700 20px 'Space Grotesk', Arial, sans-serif";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText((klasNaam||"Klas") + " — opstelling " + layout.label, PAD_X, 40);
+
+    var placedCount = Object.keys(assignment).filter(function(k){return assignment[k];}).length;
+    ctx.fillStyle = CANVAS_COLORS.muted;
+    ctx.font = "500 12px -apple-system, Arial, sans-serif";
+    var dateStr = new Date().toLocaleDateString('nl-BE');
+    ctx.fillText(placedCount+" van "+state.students.length+" leerlingen geplaatst \u00b7 "+dateStr, PAD_X, 60);
+
+    // seats
+    for(var r=0;r<rows;r++){
+      var yTop = PAD_TOP + (rows-1-r)*(CELL_H+ROW_GAP);
+      var cursorX = PAD_X;
+      layout.groups.forEach(function(size, g){
+        var groupSeats = (byRow[r] && byRow[r][g]) || [];
+        groupSeats.forEach(function(seat){
+          var x = cursorX + seat.seatIndex*(CELL_W+SEAT_GAP);
+          var studentId = assignment[seat.id];
+          var student = studentId ? sById[studentId] : null;
+
+          if(student){
+            var fill = CANVAS_COLORS.chipGrey, border = CANVAS_COLORS.chipGreyBorder;
+            if(student.vooraan){ fill = CANVAS_COLORS.amberBg; border = CANVAS_COLORS.amber; }
+            if(student.apart){ fill = CANVAS_COLORS.roseBg; border = CANVAS_COLORS.rose; }
+            ctx.fillStyle = fill;
+            ctx.strokeStyle = border;
+            ctx.lineWidth = 2;
+            drawRoundedRect(ctx, x, yTop, CELL_W, CELL_H, 10);
+            ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = CANVAS_COLORS.ink;
+            ctx.font = "700 15px 'Space Grotesk', Arial, sans-serif";
+            ctx.textAlign = "center";
+            var lines = wrapCanvasText(ctx, student.naam, CELL_W-16, 2);
+            var lineH = 18;
+            var startY = yTop + CELL_H/2 - ((lines.length-1)*lineH)/2 + 5;
+            lines.forEach(function(line, li){
+              ctx.fillText(line, x+CELL_W/2, startY + li*lineH);
+            });
+            ctx.textAlign = "left";
+          } else {
+            ctx.strokeStyle = CANVAS_COLORS.emptyBorder;
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5,4]);
+            drawRoundedRect(ctx, x, yTop, CELL_W, CELL_H, 10);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+        });
+        cursorX += size*CELL_W + (size-1)*SEAT_GAP + AISLE_GAP;
+      });
+    }
+
+    // bord (narrower, centered)
+    var bordY = PAD_TOP + rows*CELL_H + (rows-1)*ROW_GAP + BORD_MARGIN_TOP;
+    var bordW = rowWidth * 0.55;
+    var bordX = PAD_X + (rowWidth - bordW)/2;
+    ctx.fillStyle = CANVAS_COLORS.board;
+    drawRoundedRect(ctx, bordX, bordY, bordW, BORD_H, 8);
+    ctx.fill();
+    ctx.fillStyle = CANVAS_COLORS.chalk;
+    ctx.font = "700 13px 'Space Grotesk', Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("BORD", bordX+bordW/2, bordY+BORD_H/2+5);
+    ctx.textAlign = "left";
+
+    if(unplacedNames.length){
+      ctx.fillStyle = CANVAS_COLORS.muted;
+      ctx.font = "500 11.5px -apple-system, Arial, sans-serif";
+      var footerY = bordY + BORD_H + 22;
+      var footerLines = wrapCanvasText(ctx, "Niet geplaatst: "+unplacedNames.join(", "), rowWidth, 2);
+      footerLines.forEach(function(line, li){ ctx.fillText(line, PAD_X, footerY + li*15); });
+    }
+
+    return canvas;
+  }
+
+  function computeLayoutSeating(key){
+    if(key === state.layout){
+      return { rows: state.layoutRows[key], assignment: state.seatAssignment };
+    }
+    return computeReflowForLayout(key);
+  }
+
+  var inIframe = false;
+  try{ inIframe = window.self !== window.top; }catch(e){ inIframe = true; }
+  var iframeHint = inIframe ? " Dit bestand lijkt in een voorvertoningsvenster geopend te zijn — open het rechtstreeks in een eigen browsertabblad (bv. door het gedownloade bestand te dubbelklikken) voor deze functie." : "";
+
+  function exportPDF(){
+    // Open the window as the very first, synchronous action in response to the click —
+    // this is what most browsers require to avoid the popup blocker kicking in.
+    var printWin;
+    try{
+      printWin = window.open("", "_blank");
+    }catch(e){
+      printWin = null;
+    }
+    if(!printWin){
+      showNotice("Deze browser blokkeerde het openen van een nieuw tabblad voor de PDF."+iframeHint+" Klik anders op het pop-up-icoontje rechts in de adresbalk en kies \"pop-ups altijd toestaan voor deze site\", en probeer daarna opnieuw.", "warning");
+      return;
+    }
+    var klas = state.klasNaam ? state.klasNaam : "Klas";
+    var docTitle = (klas + " - klasopstelling").replace(/[\\/:*?"<>|]/g, "-");
+
+    try{
+      printWin.document.open();
+      printWin.document.write("<!DOCTYPE html><html lang=\"nl\"><head><meta charset=\"UTF-8\"><title>"+escapeHtml(docTitle)+"</title></head><body style=\"font-family:-apple-system,Arial,sans-serif; color:#555; padding:40px;\">PDF wordt aangemaakt…</body></html>");
+      printWin.document.close();
+      printWin.document.title = docTitle;
+    }catch(e){ /* some restricted contexts disallow writing into the popup immediately; continue anyway */ }
+
+    try{
+      var sById = studentsById();
+      var layoutKeys = Object.keys(LAYOUTS);
+      var pagesHtml = "";
+      for(var i=0; i<layoutKeys.length; i+=2){
+        var pairKeys = layoutKeys.slice(i, i+2);
+        var cellsHtml = pairKeys.map(function(key){
+          var seating = computeLayoutSeating(key);
+          var canvas = buildLayoutCanvas(key, seating.rows, seating.assignment, sById, klas);
+          var trimmed = trimCanvasToContent(canvas, CANVAS_COLORS.paper, 16);
+          var dataUrl = trimmed.toDataURL("image/png");
+          return '<div class="pdf-cell"><img src="'+dataUrl+'" alt="'+escapeHtml(LAYOUTS[key].label)+'"/></div>';
+        }).join("");
+        var isLast = (i+2) >= layoutKeys.length;
+        pagesHtml += '<div class="pdf-page'+(isLast?"":" pdf-page-break")+'">'+
+          '<div class="pdf-title">'+escapeHtml(klas)+' — opstellingen</div>'+
+          '<div class="pdf-grid">'+cellsHtml+'</div>'+
+        '</div>';
+      }
+
+      var printHtml = "<!DOCTYPE html><html lang=\"nl\"><head><meta charset=\"UTF-8\"><title>"+escapeHtml(docTitle)+"</title><style>"+
+        "@page{ size: portrait; margin: 9mm; }"+
+        "html, body{margin:0; height:100%;}"+
+        "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;}"+
+        ".pdf-page{page-break-inside: avoid;}"+
+        ".pdf-page-break{page-break-after:always;}"+
+        ".pdf-title{font-size:12px; font-weight:700; margin:0 0 2mm; color:#222;}"+
+        ".pdf-grid{display:flex; flex-direction:column; gap:14mm;}"+
+        ".pdf-cell{border:1px solid #ddd; border-radius:3px; padding:1.5mm; display:flex; align-items:center; justify-content:center; overflow:hidden; page-break-inside: avoid;}"+
+        ".pdf-cell img{max-width:100%; max-height:122mm; width:auto; height:auto; display:block;}"+
+        "@media print{ body{-webkit-print-color-adjust:exact; print-color-adjust:exact;} }"+
+        "</style></head><body>"+pagesHtml+"</body></html>";
+
+      printWin.document.open();
+      printWin.document.write(printHtml);
+      printWin.document.close();
+      try{ printWin.document.title = docTitle; }catch(e){}
+      printWin.focus();
+      setTimeout(function(){
+        try{ printWin.document.title = docTitle; }catch(e){}
+        try{ printWin.print(); }catch(e){ /* user can still print manually from the opened tab */ }
+      }, 400);
+    }catch(err){
+      showNotice("Er ging iets mis bij het maken van de PDF: "+(err&&err.message?err.message:"onbekende fout")+"."+iframeHint, "warning");
+      try{ printWin.close(); }catch(e){}
+    }
+  }
+
+  /* ============ INIT ============ */
+  cacheEls();
+  bindTopLevel();
+  bindModal();
+  loadState();
+  render();
+
+})();
+</script>
+</body>
+</html>
